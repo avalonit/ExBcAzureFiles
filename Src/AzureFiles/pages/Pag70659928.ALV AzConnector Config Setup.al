@@ -69,7 +69,98 @@ page 70659928 "ALV AzConnector Config Setup"
 
     actions
     {
+        area(Processing)
+        {
 
+            action("TestBinDownload")
+            {
+                Caption = 'Binary Download';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzAzure File Service API";
+                    stream: InStream;
+                begin
+                    fileService.Download('foo', 'jeager3.jpg', stream);
+                end;
+            }
+
+            action("TestBinaryUpload")
+            {
+                Caption = 'Binary Upload';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzAzure File Service API";
+                    stream: InStream;
+                    downloadResult: Boolean;
+                    uploadResult: Boolean;
+                begin
+                    //https://github.com/microsoft/AL/issues/1201
+                    uploadResult := false;
+                    downloadResult := fileService.Download('foo', 'jeager3.jpg', stream);
+                    if (downloadResult = true) then
+                        uploadResult := fileService.Upload('foo', 'jeager4.jpg', stream);
+
+                    if (uploadResult = false) then
+                        Message('Error');
+
+                end;
+            }
+
+            action("TestTxtDownload")
+            {
+                Caption = 'Txt Download';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzAzure File Service API";
+                    returnText: text;
+                    downloadResult: Boolean;
+                begin
+                    downloadResult := fileService.Download('foo', 'sample1.txt', returnText);
+                    if (downloadResult = false) then
+                        Message('Error');
+                end;
+            }
+
+            action("TestTxtUpload")
+            {
+                Caption = 'Txt Upload';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzAzure File Service API";
+                    returnText: Text;
+                    uploadResult: Boolean;
+                begin
+                    //https://github.com/microsoft/AL/issues/1201
+                    returnText := 'FOO';
+                    uploadResult := fileService.Upload('foo', 'sample2.txt', returnText);
+
+                    if (uploadResult = false) then
+                        Message('Error');
+
+                end;
+            }
+
+        }
     }
 
 

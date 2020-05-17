@@ -1,32 +1,71 @@
-/*codeunit 70659925 "ALV AzAzure File Service API"
+codeunit 70659925 "ALV AzAzure File Service API"
 {
-
-
-    procedure Download(containerName: Text; blobName: Text; var stream: InStream): Boolean
+    procedure Download(containerName: Text; fileName: Text; var stream: InStream): Boolean
     var
-        blobStorageAccount: Record "ALV AzConnector Configuration";
+        configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
         response: HttpResponseMessage;
+        headers: HttpHeaders;
+        content: HttpContent;
+        azureApiEndpoint: Text;
+        azureFileName: Text;
+        azureBlob: record TempBlob temporary;
     begin
-        if not blobStorageAccount.FindFirst() then exit(false);
-        //GET https://<accountname>.blob.core.windows.net/<container>/<blob>?<sastoken>
-        StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken
-        if not client.Get(), response) then exit(false);
-        exit(response.Content().ReadAs(stream))
+        //https://github.com/microsoft/AL/issues/1201
+        if not configuration.FindFirst() then exit(false);
+        azureApiEndpoint := StrSubstNo('%1/AzureFileDownload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
+        azureFileName := StrSubstNo('%1/%2', containerName, fileName);
+        content.GetHeaders(headers);
+        headers.Clear();
+        headers.Add('fileName', azureFileName);
+
+        azureBlob.Init;
+        azureBlob.Blob.CreateInStream(Stream);
+
+        if not client.Post(azureApiEndpoint, content, response) then begin
+            exit(response.Content().ReadAs(stream))
+        end;
     end;
 
-    procedure Upload(containerName: Text; blobName: Text; var stream: InStream): Boolean
+    procedure Download(containerName: Text; fileName: Text; var text: text): Boolean
     var
-        blobStorageAccount: Record "ALV AzConnector Configuration";
+        configuration: Record "ALV AzConnector Configuration";
+        client: HttpClient;
+        response: HttpResponseMessage;
+        headers: HttpHeaders;
+        content: HttpContent;
+        azureApiEndpoint: Text;
+        azureFileName: Text;
+    begin
+        //https://github.com/microsoft/AL/issues/1201
+        if not configuration.FindFirst() then exit(false);
+        azureApiEndpoint := StrSubstNo('%1/AzureFileDownload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
+        azureFileName := StrSubstNo('%1/%2', containerName, fileName);
+        content.GetHeaders(headers);
+        headers.Clear();
+        headers.Add('fileName', azureFileName);
+
+        if not client.Post(azureApiEndpoint, content, response) then begin
+            exit(response.Content().ReadAs(text))
+        end;
+    end;
+
+    procedure Upload(containerName: Text; fileName: Text; var stream: InStream): Boolean
+    var
+        configuration: Record "ALV AzConnector Configuration";
         memoryStream: Codeunit "MemoryStream Wrapper";
         client: HttpClient;
         response: HttpResponseMessage;
         content: HttpContent;
         headers: HttpHeaders;
         len: Integer;
+        azureApiEndpoint: Text;
+        azureFileName: Text;
     begin
-        if not blobStorageAccount.FindFirst() then exit;
-        client.SetBaseAddress(blobStorageAccount.AzureUri);
+        if not configuration.FindFirst() then exit;
+
+        azureApiEndpoint := StrSubstNo('%1/AzureFileUpload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
+        azureFileName := StrSubstNo('%1/%2', containerName, fileName);
 
         // Load the memory stream and get the size
         memoryStream.Create(0);
@@ -38,14 +77,38 @@
         // Write the Stream into HTTP Content and change the needed Header Information 
         content.WriteFrom(stream);
         content.GetHeaders(headers);
-        headers.Remove('Content-Type');
-        headers.Add('Content-Type', 'application/octet-stream');
-        headers.Add('Content-Length', StrSubstNo('%1', len));
-        headers.Add('x-ms-blob-type', 'BlockBlob');
+        headers.Clear();
+        headers.Add('fileName', azureFileName);
 
-        //PUT https://<accountname>.blob.core.windows.net/<container>/<blob>?<sastoken>
-        exit(client.Post()(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken), content, response));
+        exit(client.Post(azureApiEndpoint, content, response));
     end;
 
-}*/
+    procedure Upload(containerName: Text; fileName: Text; var text: Text): Boolean
+    var
+        configuration: Record "ALV AzConnector Configuration";
+        memoryStream: Codeunit "MemoryStream Wrapper";
+        client: HttpClient;
+        response: HttpResponseMessage;
+        content: HttpContent;
+        headers: HttpHeaders;
+        len: Integer;
+        azureApiEndpoint: Text;
+        azureFileName: Text;
+    begin
+        if not configuration.FindFirst() then exit;
 
+        azureApiEndpoint := StrSubstNo('%1AzureFileUpload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
+        azureFileName := StrSubstNo('%1/%2', containerName, fileName);
+
+        // Load the text
+        content.WriteFrom(text);
+
+        // Write the Stream into HTTP Content and change the needed Header Information 
+        content.GetHeaders(headers);
+        headers.Clear();
+        headers.Add('fileName', azureFileName);
+
+        exit(client.Post(azureApiEndpoint, content, response));
+    end;
+
+}
