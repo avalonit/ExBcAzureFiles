@@ -112,4 +112,11 @@ codeunit 70659925 "ALV AzAzure File Service API"
         exit(client.Post(azureApiEndpoint, content, response));
     end;
 
+    procedure ConvertToStream(TempBlob: Record TempBlob Temporary; var inStr: InStream);
+    var
+    begin
+        // Create an outStream from the Blob, notice the encoding.
+        TempBlob.Blob.CreateInStream(inStr, TextEncoding::UTF8);
+    end;
+
 }
