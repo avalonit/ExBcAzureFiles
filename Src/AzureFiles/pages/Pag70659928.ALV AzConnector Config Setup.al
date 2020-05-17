@@ -108,7 +108,7 @@ page 70659928 "ALV AzConnector Config Setup"
                     uploadResult := false;
                     downloadResult := fileService.Download('foo', 'jeager3.jpg', stream);
                     if (downloadResult = true) then
-                        uploadResult := fileService.Upload('foo', 'jeager4.jpg', stream);
+                        uploadResult := fileService.Upload('foo', 'jeager5.jpg', stream);
 
                     if (uploadResult = false) then
                         Message('Error');
@@ -152,7 +152,7 @@ page 70659928 "ALV AzConnector Config Setup"
                 begin
                     //https://github.com/microsoft/AL/issues/1201
                     returnText := 'FOO';
-                    uploadResult := fileService.Upload('foo', 'sample2.txt', returnText);
+                    uploadResult := fileService.Upload('foo', 'sample3.txt', returnText);
 
                     if (uploadResult = false) then
                         Message('Error');

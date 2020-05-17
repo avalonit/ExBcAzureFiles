@@ -13,16 +13,16 @@ codeunit 70659925 "ALV AzAzure File Service API"
     begin
         //https://github.com/microsoft/AL/issues/1201
         if not configuration.FindFirst() then exit(false);
-        azureApiEndpoint := StrSubstNo('%1/AzureFileDownload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
         azureFileName := StrSubstNo('%1/%2', containerName, fileName);
-        content.GetHeaders(headers);
-        headers.Clear();
-        headers.Add('fileName', azureFileName);
+        azureApiEndpoint := StrSubstNo('%1/AzureFileDownload?code=%2&fileName=%3', configuration.AzureFunctionUri, configuration.AzureFunctionKey, azureFileName);
+        //headers.Clear();
+        //headers.Add('fileName', azureFileName);
+        //content.GetHeaders(headers);
 
         azureBlob.Init;
         azureBlob.Blob.CreateInStream(Stream);
 
-        if not client.Post(azureApiEndpoint, content, response) then begin
+        if client.Post(azureApiEndpoint, content, response) then begin
             exit(response.Content().ReadAs(stream))
         end;
     end;
@@ -39,13 +39,14 @@ codeunit 70659925 "ALV AzAzure File Service API"
     begin
         //https://github.com/microsoft/AL/issues/1201
         if not configuration.FindFirst() then exit(false);
-        azureApiEndpoint := StrSubstNo('%1/AzureFileDownload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
         azureFileName := StrSubstNo('%1/%2', containerName, fileName);
-        content.GetHeaders(headers);
-        headers.Clear();
-        headers.Add('fileName', azureFileName);
+        azureApiEndpoint := StrSubstNo('%1/AzureFileDownload?code=%2&fileName=%3', configuration.AzureFunctionUri, configuration.AzureFunctionKey, azureFileName);
 
-        if not client.Post(azureApiEndpoint, content, response) then begin
+        //headers.Clear();
+        //headers.Add('fileName', azureFileName);
+        //content.GetHeaders(headers);
+
+        if client.Post(azureApiEndpoint, content, response) then begin
             exit(response.Content().ReadAs(text))
         end;
     end;
@@ -64,8 +65,8 @@ codeunit 70659925 "ALV AzAzure File Service API"
     begin
         if not configuration.FindFirst() then exit;
 
-        azureApiEndpoint := StrSubstNo('%1/AzureFileUpload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
         azureFileName := StrSubstNo('%1/%2', containerName, fileName);
+        azureApiEndpoint := StrSubstNo('%1/AzureFileUpload?code=%2&fileName=%3', configuration.AzureFunctionUri, configuration.AzureFunctionKey, azureFileName);
 
         // Load the memory stream and get the size
         memoryStream.Create(0);
@@ -76,9 +77,9 @@ codeunit 70659925 "ALV AzAzure File Service API"
 
         // Write the Stream into HTTP Content and change the needed Header Information 
         content.WriteFrom(stream);
-        content.GetHeaders(headers);
-        headers.Clear();
-        headers.Add('fileName', azureFileName);
+        //headers.Clear();
+        //headers.Add('fileName', azureFileName);
+        //content.GetHeaders(headers);
 
         exit(client.Post(azureApiEndpoint, content, response));
     end;
@@ -97,16 +98,16 @@ codeunit 70659925 "ALV AzAzure File Service API"
     begin
         if not configuration.FindFirst() then exit;
 
-        azureApiEndpoint := StrSubstNo('%1AzureFileUpload?code=%2', configuration.AzureFunctionUri, configuration.AzureFunctionKey);
         azureFileName := StrSubstNo('%1/%2', containerName, fileName);
+        azureApiEndpoint := StrSubstNo('%1/AzureFileUpload?code=%2&fileName=%3', configuration.AzureFunctionUri, configuration.AzureFunctionKey, azureFileName);
 
         // Load the text
         content.WriteFrom(text);
 
         // Write the Stream into HTTP Content and change the needed Header Information 
-        content.GetHeaders(headers);
-        headers.Clear();
-        headers.Add('fileName', azureFileName);
+        //headers.Clear();
+        //content.GetHeaders(headers);
+        //headers.Add('fileName', azureFileName);
 
         exit(client.Post(azureApiEndpoint, content, response));
     end;
