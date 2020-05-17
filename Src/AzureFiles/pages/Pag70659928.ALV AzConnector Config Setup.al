@@ -1,7 +1,8 @@
 page 70659928 "ALV AzConnector Config Setup"
 {
     Caption = 'ALV AzConnector Config Setup';
-    Editable = false;
+    ApplicationArea = All;
+    UsageCategory = Lists;
     SourceTable = "ALV AzConnector Configuration";
 
     layout
@@ -21,27 +22,40 @@ page 70659928 "ALV AzConnector Config Setup"
                     ApplicationArea = All;
                     Caption = 'Code';
                 }
-                field("AzureUri"; "AzureUri")
+                field("AzureBlobUri"; "AzureBlobUri")
                 {
                     ApplicationArea = All;
-                    Caption = 'Uri';
+                    Caption = 'Blob Uri';
                 }
 
-                field("AzureToken"; "AzureToken")
+                field("AzureBlobToken"; "AzureBlobToken")
                 {
                     ApplicationArea = All;
-                    Caption = 'Token';
+                    Caption = 'Blob Token';
                 }
-                field("AzureUsername"; "AzureUsername")
+                field("AzureBlobUsername"; "AzureBlobUsername")
                 {
                     ApplicationArea = All;
-                    Caption = 'Username';
+                    Caption = 'Blob Username';
                 }
-                field("AzurePassword"; "AzurePassword")
+                field("AzureBlobPassword"; "AzureBlobPassword")
                 {
                     ApplicationArea = All;
-                    Caption = 'Password';
+                    Caption = 'Blob Password';
                 }
+
+                field("AzureFunctionUri"; "AzureFunctionUri")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Azure Function URL';
+                }
+                field("AzureFunctionKey"; "AzureFunctionKey")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Azure Function Key';
+                }
+
+
                 field("AzureWorkingPath"; AzureWorkingPath)
                 {
                     ApplicationArea = All;

@@ -9,12 +9,7 @@ table 70659927 "ALV AzConnector Configuration"
         {
             NotBlank = true;
         }
-        field(6; "AzureUri"; Text[250])
-        {
-        }
-        field(7; "AzureUsername"; Text[250])
-        {
-        }
+
         field(8; "AzurePassword"; Text[250])
         {
         }
@@ -22,10 +17,38 @@ table 70659927 "ALV AzConnector Configuration"
         {
         }
 
+        field(6; "AzureUri"; Text[250])
+        {
+            ObsoleteState = Removed;
+        }
+        field(7; "AzureUsername"; Text[250])
+        {
+            ObsoleteState = Removed;
+        }
         field(12; "AzureToken"; Text[250])
+        {
+            ObsoleteState = Removed;
+        }
+
+        field(13; "AzureBlobUri"; Text[250])
+        {
+        }
+        field(14; "AzureBlobUsername"; Text[250])
+        {
+        }
+        field(15; "AzureBlobPassword"; Text[250])
+        {
+        }
+        field(16; "AzureBlobToken"; Text[250])
         {
         }
 
+        field(17; "AzureFunctionUri"; Text[250])
+        {
+        }
+        field(18; "AzureFunctionKey"; Text[250])
+        {
+        }
     }
 
     keys

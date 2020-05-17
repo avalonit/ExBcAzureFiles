@@ -15,7 +15,7 @@ codeunit 70659924 "ALV AzBlob Service API"
     begin
         if not blobStorageAccount.FindFirst() then exit;
         //GET https://<accountname>.blob.core.windows.net/?comp=list&<sastoken>
-        if not client.Get(StrSubstNo('%1?comp=list&%2', blobStorageAccount.AzureUri, blobStorageAccount.AzureToken), response) then begin
+        if not client.Get(StrSubstNo('%1?comp=list&%2', blobStorageAccount.AzureBlobUri, blobStorageAccount.AzureBlobToken), response) then begin
             response.Content.ReadAs(xmlContent);
             exit;
         end;
@@ -55,7 +55,7 @@ codeunit 70659924 "ALV AzBlob Service API"
     begin
         if not blobStorageAccount.FindFirst() then exit;
         //GET https://<accountname>.blob.core.windows.net/<container>?restype=container&comp=list&<sastoken>
-        if not client.Get(StrSubstNo('%1/%2?restype=container&comp=list&%3', blobStorageAccount.AzureUri, containerName, blobStorageAccount.AzureToken), response) then exit;
+        if not client.Get(StrSubstNo('%1/%2?restype=container&comp=list&%3', blobStorageAccount.AzureBlobUri, containerName, blobStorageAccount.AzureBlobToken), response) then exit;
         if not response.Content().ReadAs(xmlContent) then exit;
         if not XmlDocument.ReadFrom(xmlContent, xmlDoc) then exit;
         xmlDoc.GetRoot(root);
@@ -95,7 +95,7 @@ codeunit 70659924 "ALV AzBlob Service API"
     begin
         if not blobStorageAccount.FindFirst() then exit(false);
         //GET https://<accountname>.blob.core.windows.net/<container>/<blob>?<sastoken>
-        if not client.Get(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken), response) then exit(false);
+        if not client.Get(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureBlobUri, containerName, blobName, blobStorageAccount.AzureBlobToken), response) then exit(false);
         exit(response.Content().ReadAs(text));
     end;
 
@@ -107,7 +107,7 @@ codeunit 70659924 "ALV AzBlob Service API"
     begin
         if not blobStorageAccount.FindFirst() then exit(false);
         //GET https://<accountname>.blob.core.windows.net/<container>/<blob>?<sastoken>
-        if not client.Get(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken), response) then exit(false);
+        if not client.Get(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureBlobUri, containerName, blobName, blobStorageAccount.AzureBlobToken), response) then exit(false);
         exit(response.Content().ReadAs(stream))
     end;
 
@@ -132,7 +132,7 @@ codeunit 70659924 "ALV AzBlob Service API"
         headers.Add('x-ms-blob-type', 'BlockBlob');
 
         //PUT https://<accountname>.blob.core.windows.net/<container>/<blob>?<sastoken>
-        exit(client.Put(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken), content, response));
+        exit(client.Put(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureBlobUri, containerName, blobName, blobStorageAccount.AzureBlobToken), content, response));
     end;
 
     procedure PutBlob(containerName: Text; blobName: Text; var stream: InStream): Boolean
@@ -146,7 +146,7 @@ codeunit 70659924 "ALV AzBlob Service API"
         len: Integer;
     begin
         if not blobStorageAccount.FindFirst() then exit;
-        client.SetBaseAddress(blobStorageAccount.AzureUri);
+        client.SetBaseAddress(blobStorageAccount.AzureBlobUri);
 
         // Load the memory stream and get the size
         memoryStream.Create(0);
@@ -164,7 +164,7 @@ codeunit 70659924 "ALV AzBlob Service API"
         headers.Add('x-ms-blob-type', 'BlockBlob');
 
         //PUT https://<accountname>.blob.core.windows.net/<container>/<blob>?<sastoken>
-        exit(client.Put(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken), content, response));
+        exit(client.Put(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureBlobUri, containerName, blobName, blobStorageAccount.AzureBlobToken), content, response));
     end;
 
     procedure GetBlobUrl(containerName: Text; blobName: Text): Text
@@ -172,7 +172,7 @@ codeunit 70659924 "ALV AzBlob Service API"
         blobStorageAccount: Record "ALV AzConnector Configuration";
     begin
         if not blobStorageAccount.FindFirst() then exit;
-        exit(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureUri, containerName, blobName, blobStorageAccount.AzureToken));
+        exit(StrSubstNo('%1/%2/%3?%4', blobStorageAccount.AzureBlobUri, containerName, blobName, blobStorageAccount.AzureBlobToken));
     end;
 }
 
