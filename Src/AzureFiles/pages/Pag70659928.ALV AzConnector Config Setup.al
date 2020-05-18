@@ -199,16 +199,22 @@ page 70659928 "ALV AzConnector Config Setup"
                 var
                     fileService: Codeunit "ALV AzFile Service API";
                     returnText: Text;
-                    opResult: Boolean;
+                    opResult1: Boolean;
+                    opResult2: Boolean;
+                    inStream: InStream;
                 begin
-                    opResult := fileService.GetFile('foo', 'sample2.txt', returnText);
+                    opResult1 := fileService.GetFile('foo', 'sample2.txt', returnText);
+                    opResult2 := fileService.GetFile('foo', 'dyn.jpg', inStream);
 
-                    if (opResult = false) then begin
+                    if (opResult1 = false) then begin
                         Message('Error');
                     end
                     else begin
                         Message(returnText);
                     end;
+
+                    if (opResult2 = false) then
+                        Message('Error');
 
                 end;
             }
