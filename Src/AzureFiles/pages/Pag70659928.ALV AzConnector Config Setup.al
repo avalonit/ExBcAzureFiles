@@ -108,7 +108,7 @@ page 70659928 "ALV AzConnector Config Setup"
                     uploadResult := false;
                     downloadResult := fileService.Download('foo', 'jeager3.jpg', stream);
                     if (downloadResult = true) then
-                        uploadResult := fileService.Upload('foo', 'jeager5.jpg', stream);
+                        uploadResult := fileService.Upload('foo', 'jeager10.jpg', stream);
 
                     if (uploadResult = false) then
                         Message('Error');
@@ -159,6 +159,60 @@ page 70659928 "ALV AzConnector Config Setup"
 
                 end;
             }
+
+            action("AzureFileGetList")
+            {
+                Caption = 'AzureFileList';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzFile Service API";
+                    returnText: Text;
+                    opResult: Boolean;
+                begin
+                    opResult := fileService.List('foo', returnText);
+
+                    if (opResult = false) then begin
+                        Message('Error');
+                    end
+                    else begin
+                        Message(returnText);
+                    end;
+
+                end;
+            }
+
+
+            action("AzureFileGetFile")
+            {
+                Caption = 'AzureFileGetFile';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzFile Service API";
+                    returnText: Text;
+                    opResult: Boolean;
+                begin
+                    opResult := fileService.GetFile('foo', 'sample2.txt', returnText);
+
+                    if (opResult = false) then begin
+                        Message('Error');
+                    end
+                    else begin
+                        Message(returnText);
+                    end;
+
+                end;
+            }
+
 
         }
     }
