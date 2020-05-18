@@ -50,7 +50,7 @@ codeunit 70659926 "ALV AzFile Service API"
     end;
 
 
-    procedure GetFile(folderName: Text; fileName: Text; var output: Text): Boolean
+    procedure Download(folderName: Text; fileName: Text; var output: Text): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -101,7 +101,7 @@ codeunit 70659926 "ALV AzFile Service API"
         end;
     end;
 
-    procedure GetFile(folderName: Text; fileName: Text; var output: InStream): Boolean
+    procedure Download(folderName: Text; fileName: Text; var output: InStream): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -149,7 +149,7 @@ codeunit 70659926 "ALV AzFile Service API"
         end;
     end;
 
-    procedure DeleteFile(folderName: Text; fileName: Text; var output: Text): Boolean
+    procedure Delete(folderName: Text; fileName: Text; var output: Text): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -198,7 +198,7 @@ codeunit 70659926 "ALV AzFile Service API"
         end;
     end;
 
-    procedure PutFile(folderName: Text; fileName: Text; inStream: InStream; var output: Text): Boolean
+    procedure Upload(folderName: Text; fileName: Text; inStream: InStream; var output: Text): Boolean
     begin
         PutFileInit(folderName, fileName, inStream, output);
         PutFileRange(folderName, fileName, inStream, output);

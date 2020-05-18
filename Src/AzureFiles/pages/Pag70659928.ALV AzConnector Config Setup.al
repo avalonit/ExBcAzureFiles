@@ -203,8 +203,8 @@ page 70659928 "ALV AzConnector Config Setup"
                     opResult2: Boolean;
                     inStream: InStream;
                 begin
-                    opResult1 := fileService.GetFile('foo', 'sample2.txt', returnText);
-                    opResult2 := fileService.GetFile('foo', 'dyn.jpg', inStream);
+                    opResult1 := fileService.Download('foo', 'sample2.txt', returnText);
+                    opResult2 := fileService.Download('foo', 'dyn.jpg', inStream);
 
                     if (opResult1 = false) then begin
                         Message('Error');
@@ -234,15 +234,15 @@ page 70659928 "ALV AzConnector Config Setup"
                     opResult: Boolean;
                     inStream: InStream;
                 begin
-                    opResult := fileService.GetFile('foo', 'dyn.jpg', inStream);
+                    opResult := fileService.Download('foo', 'dyn.jpg', inStream);
 
                     if (opResult = false) then begin
                         Message('Error');
                     end
                     else begin
-                        opResult := fileService.PutFile('foo', 'dyntry.jpg', inStream, returnText);
+                        opResult := fileService.Upload('foo', 'dyntry.jpg', inStream, returnText);
                         Message('PutFile ' + returnText);
-                        opResult := fileService.DeleteFile('foo', 'dyntry.jpg', returnText);
+                        opResult := fileService.Delete('foo', 'dyntry.jpg', returnText);
                         Message('DeleteFile ' + returnText);
                     end;
 
