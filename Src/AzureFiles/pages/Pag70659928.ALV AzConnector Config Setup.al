@@ -219,6 +219,37 @@ page 70659928 "ALV AzConnector Config Setup"
                 end;
             }
 
+            action("AzureFilePutFile")
+            {
+                Caption = 'AzureFilePutAndDeleteFile';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzFile Service API";
+                    returnText: Text;
+                    opResult: Boolean;
+                    inStream: InStream;
+                begin
+                    opResult := fileService.GetFile('foo', 'dyn.jpg', inStream);
+
+                    if (opResult = false) then begin
+                        Message('Error');
+                    end
+                    else begin
+                        opResult := fileService.PutFile('foo', 'dyntry.jpg', inStream, returnText);
+                        Message('PutFile ' + returnText);
+                        opResult := fileService.DeleteFile('foo', 'dyntry.jpg', returnText);
+                        Message('DeleteFile ' + returnText);
+                    end;
+
+
+                end;
+            }
+
 
         }
     }
