@@ -1,7 +1,7 @@
 codeunit 70659926 "ALV AzFile Service API"
 {
 
-    procedure List(folderName: Text; var directoryList: text): Boolean
+    procedure List(folderName: Text; var directoryList: List of [Text]): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -19,6 +19,13 @@ codeunit 70659926 "ALV AzFile Service API"
         EncryptionManagement: codeunit "Cryptography Management";
         newLine: Text;
         charCr: Char;
+        retValue: Text;
+        lXmlDocument: XmlDocument;
+        lFileNameXmlNode: XmlNode;
+        lXmlNode: XMLNode;
+        lXmlNodeList: XMLNodeList;
+        result: Boolean;
+        fileName: Text;
     begin
         if not configuration.FindFirst() then exit(false);
 
@@ -45,7 +52,19 @@ codeunit 70659926 "ALV AzFile Service API"
         client.DefaultRequestHeaders().Add('x-ms-version', xmsversion);
 
         if client.Get(azureApiEndpoint, response) then begin
-            exit(response.Content().ReadAs(directoryList))
+            result := response.Content().ReadAs(retValue);
+            if (result = true) then begin
+                XmlDocument.ReadFrom(retValue, lXmlDocument);
+                if lXmlDocument.SelectNodes('//File', lXmlNodeList) then begin
+                    foreach lFileNameXmlNode in lXmlNodeList do begin
+                        if lFileNameXmlNode.SelectSingleNode('Name', lXmlNode) then begin
+                            fileName := lXmlNode.AsXmlElement.InnerText;
+                            directoryList.Add(fileName);
+                        end;
+                    end;
+                end;
+            end;
+            exit(result);
         end;
     end;
 

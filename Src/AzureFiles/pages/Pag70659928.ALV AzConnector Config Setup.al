@@ -171,7 +171,7 @@ page 70659928 "ALV AzConnector Config Setup"
                 trigger OnAction();
                 var
                     fileService: Codeunit "ALV AzFile Service API";
-                    returnText: Text;
+                    returnText: List of [Text];
                     opResult: Boolean;
                 begin
                     opResult := fileService.List('foo', returnText);
@@ -180,7 +180,7 @@ page 70659928 "ALV AzConnector Config Setup"
                         Message('Error');
                     end
                     else begin
-                        Message(returnText);
+                        Message(FORMAT(returnText.Count()));
                     end;
 
                 end;
