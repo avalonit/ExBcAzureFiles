@@ -344,7 +344,7 @@ codeunit 70659926 "ALV AzFile Service API"
         requestDateString: Text;
     begin
         //UTC: sample Mon, 18 May 2020 08:53:13 GMT
-        requestDateString := Format(currentDateTime, 0, '<Weekday Text,3>, <Day> <Month Text> <Year4> <Hours24>:<Minutes,2>:<Seconds,2> GMT');
+        requestDateString := Format(currentDateTime, 0, '<Weekday Text,3>, <Day> <Month Text> <Year4> <Hours24,2>:<Minutes,2>:<Seconds,2> GMT');
         exit(requestDateString);
     end;
 
