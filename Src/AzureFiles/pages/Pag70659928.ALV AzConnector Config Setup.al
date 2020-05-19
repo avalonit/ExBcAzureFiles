@@ -171,16 +171,42 @@ page 70659928 "ALV AzConnector Config Setup"
                 trigger OnAction();
                 var
                     fileService: Codeunit "ALV AzFile Service API";
-                    returnText: List of [Text];
+                    returnList: List of [Text];
                     opResult: Boolean;
                 begin
-                    opResult := fileService.List('foo', returnText);
+                    opResult := fileService.List('foo', returnList);
 
                     if (opResult = false) then begin
                         Message('Error');
                     end
                     else begin
-                        Message(FORMAT(returnText.Count()));
+                        Message(FORMAT(returnList.Count()));
+                    end;
+
+                end;
+            }
+
+            action("AzureFileGetInfo")
+            {
+                Caption = 'AzureFileGetInfo';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzFile Service API";
+                    returnText: Text;
+                    opResult: Boolean;
+                begin
+                    opResult := fileService.GetFileInfo('foo', 'sample3.txt', returnText);
+
+                    if (opResult = false) then begin
+                        Message('Error');
+                    end
+                    else begin
+                        Message(returnText);
                     end;
 
                 end;
