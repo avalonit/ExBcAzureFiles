@@ -276,6 +276,34 @@ page 70659928 "ALV AzConnector Config Setup"
                 end;
             }
 
+            action("EncDecTest")
+            {
+                Caption = 'Enc/Dec Test';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    encdec: Codeunit "ALV EncDecB64";
+                    returnText1: Text;
+                    returnText2: Text;
+                    returnText3: Text;
+                    textEnc: Text;
+                    textDec: Text;
+
+                begin
+                    textEnc := 'VABoAGUAIABxAHUAaQBjAGsAIABiAHIAbwB3AG4AIABmAG8AeAAgAGoAdQBtAHAAZQBkACAAbwB2AGUAcgAgAHQAaABlACAAbABhAHoAeQAgAGQAbwBnAC4A';
+                    textDec := 'The quick brown fox jumped over the lazy dog.';
+                    returnText1 := encdec.EncodeB64(textDec);
+                    returnText2 := encdec.DecodeB64(returnText1);
+
+                    returnText3 := encdec.DecodeB64(textEnc);
+
+                end;
+            }
+
 
         }
     }
