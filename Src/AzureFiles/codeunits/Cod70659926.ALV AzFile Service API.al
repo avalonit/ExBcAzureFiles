@@ -118,7 +118,7 @@ codeunit 70659926 "ALV AzFile Service API"
         end;
     end;
 
-    procedure GetFileInfo(folderName: Text; fileName: Text; var output: Text): Boolean
+    procedure GetFileInfo(folderName: Text; fileName: Text; var output: DateTime): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -139,6 +139,12 @@ codeunit 70659926 "ALV AzFile Service API"
         charCr: Char;
         fileDateHeader: Array[10] of Text;
         LastModified: DateTime;
+        result: Boolean;
+        dateConverter: Codeunit "Type Helper";
+        returnVar: Variant;
+        dateFormat: Text;
+        cultureName: Text;
+        dateBuffer: Text;
     begin
         if not configuration.FindFirst() then exit(false);
 
@@ -172,13 +178,22 @@ codeunit 70659926 "ALV AzFile Service API"
             response.Content().GetHeaders(headers);
             if (headers.Contains('Last-Modified')) then begin
                 headers.GetValues('Last-Modified', fileDateHeader);
-                output := fileDateHeader[1];
-                //[1]:'Mon, 18 May 2020 10:25:32 GMT'
-                output := COPYSTR(output, 6, 19);
-                output := '18/05/2020 10.35.32';
-                //EVALUATE(LastModified, output);
+                dateBuffer := fileDateHeader[1];
+                if (StrLen(dateBuffer) = 29) then begin
+                    //[1]:'Mon, 18 May 2020 10:25:32 GMT'
+                    //dateBuffer := COPYSTR(dateBuffer, 6, 20);
+                    dateFormat := 'ddd, dd MMM yyyy HH:mm:ss GMT';
+                    cultureName := '';
+                    returnVar := CREATEDATETIME(TODAY, TIME);
+                    result := dateConverter.Evaluate(returnVar, dateBuffer, dateFormat, cultureName);
+                    if (result = true) then begin
+                        output := returnVar;
+                        exit(true);
+                    end;
+                end;
+
             end;
-            exit(true)
+            exit(false)
         end;
     end;
 

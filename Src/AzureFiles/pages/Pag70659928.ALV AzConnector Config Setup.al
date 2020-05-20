@@ -197,7 +197,7 @@ page 70659928 "ALV AzConnector Config Setup"
                 trigger OnAction();
                 var
                     fileService: Codeunit "ALV AzFile Service API";
-                    returnText: Text;
+                    returnText: Variant;
                     opResult: Boolean;
                 begin
                     opResult := fileService.GetFileInfo('foo', 'sample3.txt', returnText);
@@ -206,7 +206,7 @@ page 70659928 "ALV AzConnector Config Setup"
                         Message('Error');
                     end
                     else begin
-                        Message(returnText);
+                        Message(FORMAT(returnText));
                     end;
 
                 end;
@@ -286,7 +286,7 @@ page 70659928 "ALV AzConnector Config Setup"
 
                 trigger OnAction();
                 var
-                    encdec: Codeunit "ALV EncDecB64";
+                    dotnetA: Codeunit "ALV DotNetActivity";
                     returnText1: Text;
                     returnText2: Text;
                     returnText3: Text;
@@ -296,11 +296,38 @@ page 70659928 "ALV AzConnector Config Setup"
                 begin
                     textEnc := 'VABoAGUAIABxAHUAaQBjAGsAIABiAHIAbwB3AG4AIABmAG8AeAAgAGoAdQBtAHAAZQBkACAAbwB2AGUAcgAgAHQAaABlACAAbABhAHoAeQAgAGQAbwBnAC4A';
                     textDec := 'The quick brown fox jumped over the lazy dog.';
-                    returnText1 := encdec.EncodeB64(textDec);
-                    returnText2 := encdec.DecodeB64(returnText1);
+                    returnText1 := dotnetA.EncodeB64(textDec);
+                    returnText2 := dotnetA.DecodeB64(returnText1);
 
-                    returnText3 := encdec.DecodeB64(textEnc);
+                    returnText3 := dotnetA.DecodeB64(textEnc);
 
+                end;
+            }
+
+            action("XML2CSV")
+            {
+                Caption = 'XML2CSV';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    dotnetA: Codeunit "ALV DotNetActivity";
+                    returnText1: Text;
+                    xmlFileName: Text;
+                    xsdFileName: Text;
+                    xslFileName: Text;
+                    folderName: Text;
+
+                begin
+                    xmlFileName := 'tempXMLSingleIn.xsd';
+                    xsdFileName := 'tempXSDSingle.xsd';
+                    xslFileName := 'tempXSLSingle.xsl';
+                    folderName := 'foo';
+                    dotnetA.XmlToText(folderName, xmlFileName, xsdFileName, xslFileName, returnText1);
+                    //"ABCkjsdf;2323232\r\nABCkjsdf;2323232\r\nABCkjsdf;2323232\r\nABCkjsdf;2323232\r\nABCkjsdf;2323232"
                 end;
             }
 
