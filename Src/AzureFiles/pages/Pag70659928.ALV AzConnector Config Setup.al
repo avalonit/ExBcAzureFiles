@@ -326,7 +326,7 @@ page 70659928 "ALV AzConnector Config Setup"
                     xsdFileName := 'tempXSDSingle.xsd';
                     xslFileName := 'tempXSLSingle.xsl';
                     folderName := 'foo';
-                    dotnetA.XmlToText(folderName, xmlFileName, xsdFileName, xslFileName, returnText1);
+                    dotnetA.XmlToHtml(folderName, xmlFileName, xsdFileName, xslFileName, returnText1);
                     //"ABCkjsdf;2323232\r\nABCkjsdf;2323232\r\nABCkjsdf;2323232\r\nABCkjsdf;2323232\r\nABCkjsdf;2323232"
                 end;
             }

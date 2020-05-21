@@ -36,18 +36,42 @@ codeunit 70659927 "ALV DotNetActivity"
         xmlBuffer: Text;
         xsdBuffer: Text;
         xslBuffer: Text;
-        csvBuffer: Text;
+        buffer: Text;
     begin
         //https://app365azurefiles.file.core.windows.net/to-increase/foo/tempXMLSingleIn.xsd
         //https://app365azurefiles.file.core.windows.net/to-increase/foo/tempXSDSingle.xsd
         //https://app365azurefiles.file.core.windows.net/to-increase/foo/tempXSLSingle.xsd
-
         azFileManagement.Download(folderName, xmlFileName, xmlBuffer);
         azFileManagement.Download(folderName, xsdFileName, xsdBuffer);
         azFileManagement.Download(folderName, xslFileName, xslBuffer);
         //xmlStream.ReadText(xmlBuffer);
-        csvBuffer := xmlDomMgt.TransformXMLText(xmlBuffer, xslBuffer);
+        buffer := xmlDomMgt.TransformXMLText(xmlBuffer, xslBuffer);
+        azFileManagement.Upload(folderName, 'output.html', buffer);
     end;
+
+    procedure XmlToCsvText(folderName: Text; xmlFileName: Text; xsdFileName: Text; xslFileName: Text; output: Text) ReturnValue: Text
+    var
+        xmlDomMgt: Codeunit "XML DOM Management";
+        azFileManagement: codeunit "ALV AzAzure File Service API";
+        xmlBuffer: Text;
+        xsdBuffer: Text;
+        xslBuffer: Text;
+        buffer: Text;
+        DocumentLine: Record "Sales Header";
+        textFields: Record "ALV TextLine";
+    begin
+        //https://app365azurefiles.file.core.windows.net/to-increase/foo/tempXMLSingleIn.xsd
+        //https://app365azurefiles.file.core.windows.net/to-increase/foo/tempXSDSingle.xsd
+        //https://app365azurefiles.file.core.windows.net/to-increase/foo/tempXSLSingle.xsd
+        azFileManagement.Download(folderName, xmlFileName, xmlBuffer);
+        azFileManagement.Download(folderName, xsdFileName, xsdBuffer);
+        azFileManagement.Download(folderName, xslFileName, xslBuffer);
+        //xmlStream.ReadText(xmlBuffer);
+        buffer := xmlDomMgt.TransformXMLText(xmlBuffer, xslBuffer);
+        azFileManagement.Upload(folderName, 'output.html', buffer);
+
+    end;
+
 
 
 }
