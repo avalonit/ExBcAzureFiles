@@ -160,6 +160,57 @@ page 70659928 "ALV AzConnector Config Setup"
                 end;
             }
 
+            action("AzureFolderExist")
+            {
+                Caption = 'AzureFolderExist';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = SendMail;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    fileService: Codeunit "ALV AzFile Service API";
+                    opResult: Boolean;
+                begin
+                    opResult := fileService.FolderExist('foo');
+
+                    if (opResult = false) then begin
+                        Message('Folder foo does not exist');
+                    end
+                    else begin
+                        Message('Folder foo exists')
+                    end;
+
+                    opResult := fileService.FolderExist('nofoo');
+
+                    if (opResult = false) then begin
+                        Message('Folder nofoo does not exist');
+                    end
+                    else begin
+                        Message('Folder nofoo exists')
+                    end;
+
+                    opResult := fileService.FileExist('foo', 'sample3.txt');
+
+                    if (opResult = false) then begin
+                        Message('File sample3.txt does not exist');
+                    end
+                    else begin
+                        Message('File sample3.txt exists')
+                    end;
+
+                    opResult := fileService.FileExist('foo', 'filedontexist.txt');
+
+                    if (opResult = false) then begin
+                        Message('File filedontexist.txt does not exist');
+                    end
+                    else begin
+                        Message('File filedontexist.txt exists')
+                    end;
+
+                end;
+            }
             action("AzureFileGetList")
             {
                 Caption = 'AzureFileList';

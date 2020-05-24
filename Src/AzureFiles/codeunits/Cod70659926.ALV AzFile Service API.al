@@ -1,6 +1,120 @@
 codeunit 70659926 "ALV AzFile Service API"
 {
 
+    procedure FolderExist(folderName: Text): Boolean
+    var
+        configuration: Record "ALV AzConnector Configuration";
+        client: HttpClient;
+        response: HttpResponseMessage;
+        headers: HttpHeaders;
+        request: HttpRequestMessage;
+        azureApiEndpoint: Text;
+        urlFolderPart: Text;
+        requestDateString: Text;
+        sharedKeyLite: Text;
+        canonicalizedStringToBuild: Text;
+        method: Text;
+        xmsversion: Text;
+        urlCanonicalPath: Text;
+        contentType: Text;
+        EncryptionManagement: codeunit "Cryptography Management";
+        newLine: Text;
+        charCr: Char;
+        result: Boolean;
+        retValue: Text;
+    begin
+        if not configuration.FindFirst() then exit(false);
+
+        //File service REST API: https://docs.microsoft.com/it-it/rest/api/storageservices/file-service-rest-api
+        urlFolderPart := StrSubstNo('%1?restype=directory', folderName);
+        azureApiEndpoint := StrSubstNo('%1/%2', configuration.AzureBlobUri, urlFolderPart);
+
+        requestDateString := GetUTCDate(CurrentDateTime());
+        method := 'HEAD';
+        xmsversion := '2017-11-09';
+        //contentType := 'text/plain; charset=utf-8';
+        contentType := '';
+        urlCanonicalPath := StrSubstNo('/%1/%2/%3', configuration.AzureBlobUsername, configuration.AzureWorkingPath, folderName);
+
+        // REST API Shared Key https://docs.microsoft.com/en-us/azure/storage/common/storage-rest-api-auth
+        charCr := 10;
+        newLine := FORMAT(charCr);
+        canonicalizedStringToBuild := StrSubstNo('%1%6%6%2%6%6x-ms-date:%3%6x-ms-version:%4%6%5', method, contentType, requestDateString, xmsversion, urlCanonicalPath, newLine);
+        sharedKeyLite := EncryptionManagement.GenerateBase64KeyedHashAsBase64String(canonicalizedStringToBuild, configuration.AzureBlobToken, 2);
+        sharedKeyLite := StrSubstNo('SharedKeyLite %1:%2', configuration.AzureBlobUsername, sharedKeyLite);
+
+        request.SetRequestUri(azureApiEndpoint);
+        request.GetHeaders(Headers);
+        headers.Clear();
+        headers.Add('Authorization', sharedKeyLite);
+        headers.Add('x-ms-date', requestDateString);
+        headers.Add('x-ms-version', xmsversion);
+        request.Method := method;
+
+        if client.Send(request, response) then begin
+            if (response.IsSuccessStatusCode) then
+                exit(true);
+        end;
+        exit(false);
+    end;
+
+    procedure FileExist(folderName: Text; fileName: Text): Boolean
+    var
+        configuration: Record "ALV AzConnector Configuration";
+        client: HttpClient;
+        response: HttpResponseMessage;
+        headers: HttpHeaders;
+        request: HttpRequestMessage;
+        azureApiEndpoint: Text;
+        urlFolderPart: Text;
+        requestDateString: Text;
+        sharedKeyLite: Text;
+        canonicalizedStringToBuild: Text;
+        method: Text;
+        xmsversion: Text;
+        urlCanonicalPath: Text;
+        contentType: Text;
+        EncryptionManagement: codeunit "Cryptography Management";
+        newLine: Text;
+        charCr: Char;
+        result: Boolean;
+    begin
+        if not configuration.FindFirst() then exit(false);
+
+        //File service REST API: https://docs.microsoft.com/it-it/rest/api/storageservices/file-service-rest-api
+        urlFolderPart := StrSubstNo('%1/%2', folderName, fileName);
+        azureApiEndpoint := StrSubstNo('%1/%2', configuration.AzureBlobUri, urlFolderPart);
+
+        requestDateString := GetUTCDate(CurrentDateTime());
+        method := 'HEAD';
+        xmsversion := '2017-11-09';
+        //contentType := 'text/plain; charset=utf-8';
+        contentType := '';
+        urlCanonicalPath := StrSubstNo('/%1/%2/%3/%4', configuration.AzureBlobUsername, configuration.AzureWorkingPath, folderName, fileName);
+
+        // REST API Shared Key https://docs.microsoft.com/en-us/azure/storage/common/storage-rest-api-auth
+        charCr := 10;
+        newLine := FORMAT(charCr);
+        canonicalizedStringToBuild := StrSubstNo('%1%6%6%2%6%6x-ms-date:%3%6x-ms-version:%4%6%5', method, contentType, requestDateString, xmsversion, urlCanonicalPath, newLine);
+        sharedKeyLite := EncryptionManagement.GenerateBase64KeyedHashAsBase64String(canonicalizedStringToBuild, configuration.AzureBlobToken, 2);
+        sharedKeyLite := StrSubstNo('SharedKeyLite %1:%2', configuration.AzureBlobUsername, sharedKeyLite);
+
+        request.SetRequestUri(azureApiEndpoint);
+        request.GetHeaders(Headers);
+        headers.Clear();
+        headers.Add('Authorization', sharedKeyLite);
+        headers.Add('x-ms-date', requestDateString);
+        headers.Add('x-ms-version', xmsversion);
+        request.Method := method;
+
+        if client.Send(request, response) then begin
+            if (response.IsSuccessStatusCode) then begin
+                exit(true)
+            end;
+        end;
+        exit(false)
+    end;
+
     procedure List(folderName: Text; var directoryList: List of [Text]): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
@@ -175,20 +289,23 @@ codeunit 70659926 "ALV AzFile Service API"
         request.Method := method;
 
         if client.Send(request, response) then begin
-            response.Content().GetHeaders(headers);
-            if (headers.Contains('Last-Modified')) then begin
-                headers.GetValues('Last-Modified', fileDateHeader);
-                dateBuffer := fileDateHeader[1];
-                if (StrLen(dateBuffer) = 29) then begin
-                    //[1]:'Mon, 18 May 2020 10:25:32 GMT'
-                    //dateBuffer := COPYSTR(dateBuffer, 6, 20);
-                    dateFormat := 'ddd, dd MMM yyyy HH:mm:ss GMT';
-                    cultureName := '';
-                    returnVar := CREATEDATETIME(TODAY, TIME);
-                    result := dateConverter.Evaluate(returnVar, dateBuffer, dateFormat, cultureName);
-                    if (result = true) then begin
-                        output := returnVar;
-                        exit(true);
+            if (response.IsSuccessStatusCode) then begin
+
+                response.Content().GetHeaders(headers);
+                if (headers.Contains('Last-Modified')) then begin
+                    headers.GetValues('Last-Modified', fileDateHeader);
+                    dateBuffer := fileDateHeader[1];
+                    if (StrLen(dateBuffer) = 29) then begin
+                        //[1]:'Mon, 18 May 2020 10:25:32 GMT'
+                        //dateBuffer := COPYSTR(dateBuffer, 6, 20);
+                        dateFormat := 'ddd, dd MMM yyyy HH:mm:ss GMT';
+                        cultureName := '';
+                        returnVar := CREATEDATETIME(TODAY, TIME);
+                        result := dateConverter.Evaluate(returnVar, dateBuffer, dateFormat, cultureName);
+                        if (result = true) then begin
+                            output := returnVar;
+                            exit(true);
+                        end;
                     end;
                 end;
 
