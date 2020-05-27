@@ -1,6 +1,6 @@
 codeunit 70659927 "ALV DotNetActivity"
 {
-    //TEST2
+    //TEST4
     procedure EncodeB64(textFromInStream: Text) ReturnValue: Text
     var
         encodedString: Text;
