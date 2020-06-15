@@ -383,6 +383,32 @@ page 70659928 "ALV AzConnector Config Setup"
             }
 
 
+            action("ZipUnzip")
+            {
+                Caption = 'ZipUnzip';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = Compress;
+                ApplicationArea = All;
+
+                trigger OnAction();
+                var
+                    dotnetA: Codeunit "ALV Zip Helper";
+                    outputFileName: Text;
+                    folderToZip: Text;
+                    destinationFolderUnzip: Text;
+
+                begin
+                    outputFileName := '/zip/foo.zip';
+                    folderToZip := 'foo';
+                    destinationFolderUnzip := '/unzip';
+                    dotnetA.PackageZip(outputFileName, folderToZip);
+                    dotnetA.PackageUnzip(outputFileName, destinationFolderUnzip);
+                end;
+            }
+
+
+
         }
     }
 

@@ -412,12 +412,23 @@ codeunit 70659926 "ALV AzFile Service API"
     end;
 
     procedure Upload(folderName: Text; fileName: Text; inStream: InStream; var output: Text): Boolean
+    var
+        memoryStream: Codeunit "MemoryStream Wrapper";
+        contentLength: Integer;
+        stream: InStream;
     begin
-        PutFileInit(folderName, fileName, inStream, output);
-        PutFileRange(folderName, fileName, inStream, output);
+        // Load the memory stream and get the size
+        memoryStream.Create(0);
+        memoryStream.ReadFrom(inStream);
+        contentLength := memoryStream.Length();
+        memoryStream.SetPosition(0);
+        memoryStream.GetInStream(stream);
+
+        PutFileInit(folderName, fileName, contentLength, output);
+        PutFileRange(folderName, fileName, stream, contentLength, output);
     end;
 
-    procedure PutFileInit(folderName: Text; fileName: Text; stream: InStream; var output: Text): Boolean
+    procedure PutFileInit(folderName: Text; fileName: Text; contentLength: Integer; var output: Text): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -436,8 +447,6 @@ codeunit 70659926 "ALV AzFile Service API"
         EncryptionManagement: codeunit "Cryptography Management";
         newLine: Text;
         charCr: Char;
-        contentLength: Text;
-        memoryStream: Codeunit "MemoryStream Wrapper";
     begin
         if not configuration.FindFirst() then exit(false);
 
@@ -451,21 +460,17 @@ codeunit 70659926 "ALV AzFile Service API"
         contentType := 'text/plain; charset=utf-8';
         urlCanonicalPath := StrSubstNo('/%1/%2/%3/%4', configuration.AzureBlobUsername, configuration.AzureWorkingPath, folderName, fileName);
 
-        // Load the memory stream and get the size
-        memoryStream.Create(0);
-        memoryStream.ReadFrom(stream);
-        contentLength := Format(memoryStream.Length());
 
         // REST API Shared Key https://docs.microsoft.com/en-us/azure/storage/common/storage-rest-api-auth
         charCr := 10;
         newLine := FORMAT(charCr);
-        canonicalizedStringToBuild := StrSubstNo('%1%6%6%2%6%6x-ms-content-length:%7%6x-ms-date:%3%6x-ms-type:file%6x-ms-version:%4%6%5', method, contentType, requestDateString, xmsversion, urlCanonicalPath, newLine, contentLength);
+        canonicalizedStringToBuild := StrSubstNo('%1%6%6%2%6%6x-ms-content-length:%7%6x-ms-date:%3%6x-ms-type:file%6x-ms-version:%4%6%5', method, contentType, requestDateString, xmsversion, urlCanonicalPath, newLine, Format(contentLength));
         sharedKeyLite := EncryptionManagement.GenerateBase64KeyedHashAsBase64String(canonicalizedStringToBuild, configuration.AzureBlobToken, 2);
         sharedKeyLite := StrSubstNo('SharedKeyLite %1:%2', configuration.AzureBlobUsername, sharedKeyLite);
 
         client.DefaultRequestHeaders().Clear();
         client.DefaultRequestHeaders().Add('Authorization', sharedKeyLite);
-        client.DefaultRequestHeaders().Add('x-ms-content-length', contentLength);
+        client.DefaultRequestHeaders().Add('x-ms-content-length', Format(contentLength));
         client.DefaultRequestHeaders().Add('x-ms-date', requestDateString);
         client.DefaultRequestHeaders().Add('x-ms-type', 'file');
         client.DefaultRequestHeaders().Add('x-ms-version', xmsversion);
@@ -475,7 +480,7 @@ codeunit 70659926 "ALV AzFile Service API"
         end;
     end;
 
-    procedure PutFileRange(folderName: Text; fileName: Text; stream: InStream; var output: Text): Boolean
+    procedure PutFileRange(folderName: Text; fileName: Text; stream: InStream; contentLength: Integer; var output: Text): Boolean
     var
         configuration: Record "ALV AzConnector Configuration";
         client: HttpClient;
@@ -494,9 +499,7 @@ codeunit 70659926 "ALV AzFile Service API"
         EncryptionManagement: codeunit "Cryptography Management";
         newLine: Text;
         charCr: Char;
-        contentLength: Text;
         xmsrange: Text;
-        memoryStream: Codeunit "MemoryStream Wrapper";
     begin
         if not configuration.FindFirst() then exit(false);
 
@@ -511,17 +514,12 @@ codeunit 70659926 "ALV AzFile Service API"
         urlCanonicalPath := StrSubstNo('/%1/%2/%3/%4?comp=range', configuration.AzureBlobUsername, configuration.AzureWorkingPath, folderName, fileName);
 
         // Load the memory stream and get the size
-        memoryStream.Create(0);
-        memoryStream.ReadFrom(stream);
-        contentLength := Format(memoryStream.Length());
-        xmsrange := StrSubstNo('bytes=0-%1', Format(memoryStream.Length() - 1));
-        memoryStream.SetPosition(0);
-        memoryStream.GetInStream(stream);
+        xmsrange := StrSubstNo('bytes=0-%1', Format(contentLength - 1));
 
         // REST API Shared Key https://docs.microsoft.com/en-us/azure/storage/common/storage-rest-api-auth
         charCr := 10;
         newLine := FORMAT(charCr);
-        canonicalizedStringToBuild := StrSubstNo('%1%6%6%2%6%6x-ms-content-length:%7%6x-ms-date:%3%6x-ms-range:%8%6x-ms-type:file%6x-ms-version:%4%6x-ms-write:update%6%5', method, contentType, requestDateString, xmsversion, urlCanonicalPath, newLine, contentLength, xmsrange);
+        canonicalizedStringToBuild := StrSubstNo('%1%6%6%2%6%6x-ms-content-length:%7%6x-ms-date:%3%6x-ms-range:%8%6x-ms-type:file%6x-ms-version:%4%6x-ms-write:update%6%5', method, contentType, requestDateString, xmsversion, urlCanonicalPath, newLine, Format(contentLength), xmsrange);
         sharedKeyLite := EncryptionManagement.GenerateBase64KeyedHashAsBase64String(canonicalizedStringToBuild, configuration.AzureBlobToken, 2);
         sharedKeyLite := StrSubstNo('SharedKeyLite %1:%2', configuration.AzureBlobUsername, sharedKeyLite);
 
@@ -539,13 +537,13 @@ codeunit 70659926 "ALV AzFile Service API"
         content.WriteFrom(stream);
         Content.GetHeaders(Headers);
         headers.Remove('Content-Length');
-        headers.Add('x-ms-content-length', contentLength);
+        headers.Add('x-ms-content-length', Format(contentLength));
         headers.Add('x-ms-date', requestDateString);
         headers.Add('x-ms-range', xmsrange);
         headers.Add('x-ms-type', 'file');
         headers.Add('x-ms-version', xmsversion);
         headers.Add('x-ms-write', 'update');
-        headers.Add('Content-Length', contentLength);
+        headers.Add('Content-Length', Format(contentLength));
 
         if client.Put(azureApiEndpoint, content, response) then begin
             exit(response.Content().ReadAs(output))
@@ -557,7 +555,7 @@ codeunit 70659926 "ALV AzFile Service API"
         requestDateString: Text;
     begin
         //UTC: sample Mon, 18 May 2020 08:53:13 GMT
-        requestDateString := Format(currentDateTime, 0, '<Weekday Text,3>, <Day> <Month Text> <Year4> <Hours24,2>:<Minutes,2>:<Seconds,2> GMT');
+        requestDateString := Format(currentDateTime, 0, '<Weekday Text,3>, <Day> <Month Text,3> <Year4> <Hours24,2>:<Minutes,2>:<Seconds,2> GMT');
         exit(requestDateString);
     end;
 
