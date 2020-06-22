@@ -407,7 +407,48 @@ page 70659928 "ALV AzConnector Config Setup"
                 end;
             }
 
+            action("XMLTest")
+            {
+                Caption = 'XMLTest';
+                Promoted = true;
+                PromotedCategory = Process;
+                Image = Compress;
+                ApplicationArea = All;
 
+                trigger OnAction();
+                var
+                    AVInstream: InStream;
+                    AVXmlDocument: XmlDocument;
+                    AVXmlDocumentRoot: XmlElement;
+                    AVXmlNodeList: XmlNodeList;
+                    AVXmlNode: XmlNode;
+                    XmlCustomText: Text;
+                    StringBuilder: TextBuilder;
+                    len: Integer;
+                    i: Integer;
+                    NodeText: Text;
+                begin
+                    AVXmlDocument := XmlDocument.Create();
+                    XmlCustomText := '';
+
+                    StringBuilder.Append('<headers>');
+                    StringBuilder.Append('<to>alberto@valenti.com</to>');
+                    StringBuilder.Append('<from>alberto@valenti</from>');
+                    StringBuilder.Append('<subject>This is a sample mail.</subject>');
+                    StringBuilder.Append('</headers>');
+
+                    XmlCustomText := StringBuilder.ToText();
+                    XmlDocument.ReadFrom(XmlCustomText, AVXmlDocument);
+                    AVXmlDocument.GetRoot(AVXmlDocumentRoot);
+
+                    if not AVXmlDocumentRoot.SelectNodes('/headers/to', AVXmlNodeList) then exit;
+                    for i := 1 to AVXmlNodeList.Count() do begin
+                        AVXmlNodeList.Get(i, AVXmlNode);
+                        NodeText := AVXmlNode.AsXmlElement().InnerText();
+                    end;
+
+                end;
+            }
 
         }
     }
